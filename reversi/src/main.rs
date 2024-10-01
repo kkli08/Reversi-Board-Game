@@ -54,11 +54,12 @@ fn main() {
 
     let mut user_input = String::new();
 
-    // game loop
+    // loop for check user input
     loop {
         print!("Enter move for color _ (RowCol): ");
         io::stdout().flush().unwrap();
 
+        // read input
         match io::stdin().read_line(&mut user_input) {
             Ok(_) => {
                 let input = user_input.trim();
@@ -79,6 +80,5 @@ fn main() {
         }
     }
 
-    // read input
 
 }
