@@ -52,33 +52,48 @@ fn main() {
 
     print_board(&board);
 
-    let mut user_input = String::new();
 
-    // loop for check user input
+    // game loop
     loop {
-        print!("Enter move for color _ (RowCol): ");
-        io::stdout().flush().unwrap();
+        let mut user_input = String::new();
+        let input_row_idx;
+        let input_col_idx;
+        // loop for check user input
+        loop {
+            print!("Enter move for color _ (RowCol): ");
+            io::stdout().flush().unwrap();
 
-        // read input
-        match io::stdin().read_line(&mut user_input) {
-            Ok(_) => {
-                let input = user_input.trim();
+            // read input
+            match io::stdin().read_line(&mut user_input) {
+                Ok(_) => {
+                    let input = user_input.trim();
 
-                if check_input(input, &board) {
-                    break;
-                } else {
+                    if check_input(input, &board) {
+                        let chars: Vec<char> = input.chars().collect();
+                        input_row_idx = chars[0] as usize - 'a' as usize;
+                        input_col_idx = chars[1] as usize - 'a' as usize;
+                        println!("Current cell is : {}", board[input_row_idx][input_col_idx]);
+                        break;
+                    } else {
+                        println!("Invalid move. Try again.");
+                        print_board(&board);
+                        user_input.clear();
+                    }
+                }
+                Err(_) => {
                     println!("Invalid move. Try again.");
                     print_board(&board);
                     user_input.clear();
                 }
             }
-            Err(_) => {
-                println!("Invalid move. Try again.");
-                print_board(&board);
-                user_input.clear();
-            }
         }
+
+        // check flip
+        // let mut flip: Vec<Vec<u8>> = vec![vec![0; 8]; 8];
+
     }
+
+
 
 
 }
