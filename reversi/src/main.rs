@@ -2,7 +2,7 @@ use std::io;
 use std::io::Write;
 
 #[derive(Clone, Copy)]
-enum Color {
+enum Colour {
     Black,
     White,
 }
@@ -51,15 +51,15 @@ fn check_input(input: &str, board: &Vec<Vec<char>>) -> bool {
     }
 }
 
-fn opposite_color_to_char(color: Color) -> char {
-    match color {
-        Color::Black => 'W',
-        Color::White => 'B',
+fn opposite_colour_to_char(colour: Colour) -> char {
+    match colour {
+        Colour::Black => 'W',
+        Colour::White => 'B',
     }
 }
-fn check_flip(board: &mut Vec<Vec<char>>, row_idx: usize, col_idx: usize, current_color: Color) {
+fn check_flip(board: &mut Vec<Vec<char>>, row_idx: usize, col_idx: usize, current_colour: Colour) {
     let current_char = board[row_idx][col_idx];
-    let opponent_char = opposite_color_to_char(current_color);
+    let opponent_char = opposite_colour_to_char(current_colour);
 
     let directions: [(i32, i32); 8] = [
         (-1, 0), // up
@@ -88,13 +88,14 @@ fn check_flip(board: &mut Vec<Vec<char>>, row_idx: usize, col_idx: usize, curren
                 has_opponent = true;
                 position_to_flip.push((x as usize, y as usize));
             } else {
-                // same color
+                // same colour
                 if has_opponent {
                     for &(fx, fy) in &position_to_flip {
                         board[fx][fy] = current_char;
                     }
-                    break;
+
                 }
+                break;
             }
 
             x += dx;
@@ -104,8 +105,12 @@ fn check_flip(board: &mut Vec<Vec<char>>, row_idx: usize, col_idx: usize, curren
 
 }
 
-fn check_flip_rule(board: &Vec<Vec<char>>, row_idx: usize, col_idx: usize, current_color: Color) -> bool{
-    let opponent_char = opposite_color_to_char(current_color);
+fn check_flip_rule(board: &Vec<Vec<char>>, row_idx: usize, col_idx: usize, current_colour: Colour) -> bool{
+    // if row_idx == 5 && col_idx == 7 {
+    //     // case "fh"
+    //     println!("==========================Debug Section==========================\n\n");
+    // }
+    let opponent_char = opposite_colour_to_char(current_colour);
 
     let directions: [(i32, i32); 8] = [
         (-1, -1), // upper-left
@@ -131,10 +136,14 @@ fn check_flip_rule(board: &Vec<Vec<char>>, row_idx: usize, col_idx: usize, curre
             } else if board[ux][uy] == opponent_char {
                 has_opponent = true;
             } else {
-                // same color
+                // same colour
                 if has_opponent {
+                    if row_idx == 5 && col_idx == 7 {
+                        // println!("=> bp0 ");
+                    }
                     return true;
                 }
+                break;
             }
             x += dx;
             y += dy;
@@ -143,15 +152,15 @@ fn check_flip_rule(board: &Vec<Vec<char>>, row_idx: usize, col_idx: usize, curre
     false
 }
 
-fn read_input(board: &mut Vec<Vec<char>>, current_color: Color) -> (usize, usize) {
+fn read_input(board: &mut Vec<Vec<char>>, current_colour: Colour) -> (usize, usize) {
     let mut user_input = String::new();
     let mut input_row_idx;
     let mut input_col_idx;
     // loop for check user input
     loop {
-        print!("Enter move for color {} (RowCol): ", match current_color {
-            Color::Black => "B",
-            Color::White => "W",
+        print!("Enter move for colour {} (RowCol): ", match current_colour {
+            Colour::Black => "B",
+            Colour::White => "W",
         });
         // io::stdout().flush().unwrap();
         io::stdout().flush().expect("Failed to flush stdout.");
@@ -169,7 +178,7 @@ fn read_input(board: &mut Vec<Vec<char>>, current_color: Color) -> (usize, usize
                     // println!("Current cell is : {}", board[input_row_idx][input_col_idx]);
 
                     // check flip rule
-                    if check_flip_rule(&board, input_row_idx, input_col_idx, current_color) {
+                    if check_flip_rule(&board, input_row_idx, input_col_idx, current_colour) {
                         return (input_row_idx, input_col_idx);
                     } else {
                         // flip-rule not meet
@@ -193,10 +202,10 @@ fn read_input(board: &mut Vec<Vec<char>>, current_color: Color) -> (usize, usize
     }
 }
 
-fn check_availability(board: &Vec<Vec<char>>, current_color: Color) -> bool {
+fn check_availability(board: &Vec<Vec<char>>, current_colour: Colour) -> bool {
     for row_idx in 0..board.len() {
         for col_idx in 0..board[row_idx].len() {
-            if board[row_idx][col_idx] == '.' && check_flip_rule(&board, row_idx, col_idx, current_color) {
+            if board[row_idx][col_idx] == '.' && check_flip_rule(&board, row_idx, col_idx, current_colour) {
                 return true;
             }
         }
@@ -218,16 +227,16 @@ fn game_over(board: &Vec<Vec<char>>) {
     }
 
     match (black_cnt, white_cnt) {
-        (b, w) if b > w => println!("Black wins by {} points!", b-w),
-        (b, w) if b < w => println!("White wins by {} points!", w-b),
-        _ => println!("Draw!"),
+        (b, w) if b > w => print!("Black wins by {} points!", b-w),
+        (b, w) if b < w => print!("White wins by {} points!", w-b),
+        _ => print!("Draw!"),
     }
 }
 
 fn main() {
     // board instance
     let mut board: Vec<Vec<char>> = Vec::new();
-    let mut current_color = Color::Black;
+    let mut current_colour = Colour::Black;
     let mut no_more_moves_black = false;
     let mut no_more_moves_white = false;
 
@@ -245,38 +254,38 @@ fn main() {
             break;
         }
         // check availability
-        if check_availability(&board, current_color) {
-            match current_color {
-                Color::Black => {no_more_moves_black = false;},
-                Color::White => {no_more_moves_white = false;},
+        if check_availability(&board, current_colour) {
+            match current_colour {
+                Colour::Black => {no_more_moves_black = false;},
+                Colour::White => {no_more_moves_white = false;},
             }
             // read input
-            let (input_row_idx, input_col_idx) = read_input(&mut board, current_color);
+            let (input_row_idx, input_col_idx) = read_input(&mut board, current_colour);
 
             // new move
-            match current_color {
-                Color::Black => {board[input_row_idx][input_col_idx] = 'B';}
-                Color::White => {board[input_row_idx][input_col_idx] = 'W';}
+            match current_colour {
+                Colour::Black => {board[input_row_idx][input_col_idx] = 'B';}
+                Colour::White => {board[input_row_idx][input_col_idx] = 'W';}
             }
 
             // flip the opponent disks
-            check_flip(&mut board, input_row_idx, input_col_idx, current_color);
+            check_flip(&mut board, input_row_idx, input_col_idx, current_colour);
             print_board(&board);
         } else {
-            match current_color {
-                Color::Black => {no_more_moves_black = true;},
-                Color::White => {no_more_moves_white = true;},
+            match current_colour {
+                Colour::Black => {no_more_moves_black = true;},
+                Colour::White => {no_more_moves_white = true;},
             }
-            println!("{} player has no valid move.", match current_color {
-                Color::Black => "B",
-                Color::White => "W",
+            println!("{} player has no valid move.", match current_colour {
+                Colour::Black => "B",
+                Colour::White => "W",
             });
         }
 
         // change turn
-        current_color = match current_color {
-            Color::Black => Color::White,
-            Color::White => Color::Black,
+        current_colour = match current_colour {
+            Colour::Black => Colour::White,
+            Colour::White => Colour::Black,
         }
 
     }

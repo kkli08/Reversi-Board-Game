@@ -1,5 +1,10 @@
 # Reversi Board Game
 
+### Testing
+```shell
+cargo run < ../test/test_input.txt > ../test/my_output.txt
+```
+
 ## Game Rules
 Here is a brief description of the Reversi board game. Reversi is played 
 on a 8x8 board (like a chess board or a checkers board) with two players. 
