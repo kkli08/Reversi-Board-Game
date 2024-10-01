@@ -193,11 +193,43 @@ fn read_input(board: &mut Vec<Vec<char>>, current_color: Color) -> (usize, usize
     }
 }
 
+fn check_availability(board: &Vec<Vec<char>>, current_color: Color) -> bool {
+    for row_idx in 0..board.len() {
+        for col_idx in 0..board[row_idx].len() {
+            if board[row_idx][col_idx] == '.' && check_flip_rule(&board, row_idx, col_idx, current_color) {
+                return true;
+            }
+        }
+    }
+
+    false
+}
+
+fn game_over(board: &Vec<Vec<char>>) {
+    let mut black_cnt = 0;
+    let mut white_cnt = 0;
+
+    for row_idx in 0..board.len() {
+        for col_idx in 0..board[row_idx].len() {
+            if board[row_idx][col_idx] == '.' {continue;}
+            else if board[row_idx][col_idx] == 'W' { white_cnt += 1; }
+            else { black_cnt += 1; }
+        }
+    }
+
+    match (black_cnt, white_cnt) {
+        (b, w) if b > w => println!("Black wins by {} points!", b-w),
+        (b, w) if b < w => println!("White wins by {} points!", w-b),
+        _ => println!("Draw!"),
+    }
+}
 
 fn main() {
     // board instance
     let mut board: Vec<Vec<char>> = Vec::new();
     let mut current_color = Color::Black;
+    let mut no_more_moves_black = false;
+    let mut no_more_moves_white = false;
 
     // init board
     init_board(&mut board, 8, 8);
@@ -206,18 +238,40 @@ fn main() {
 
     // game loop
     loop {
-        // read input
-        let (input_row_idx, input_col_idx) = read_input(&mut board, current_color);
-
-        // new move
-        match current_color {
-            Color::Black => {board[input_row_idx][input_col_idx] = 'B';}
-            Color::White => {board[input_row_idx][input_col_idx] = 'W';}
+        // check game state
+        if no_more_moves_black && no_more_moves_white {
+            // game over
+            game_over(&board);
+            break;
         }
+        // check availability
+        if check_availability(&board, current_color) {
+            match current_color {
+                Color::Black => {no_more_moves_black = false;},
+                Color::White => {no_more_moves_white = false;},
+            }
+            // read input
+            let (input_row_idx, input_col_idx) = read_input(&mut board, current_color);
 
-        // check flip
-        check_flip(&mut board, input_row_idx, input_col_idx, current_color);
-        print_board(&board);
+            // new move
+            match current_color {
+                Color::Black => {board[input_row_idx][input_col_idx] = 'B';}
+                Color::White => {board[input_row_idx][input_col_idx] = 'W';}
+            }
+
+            // flip the opponent disks
+            check_flip(&mut board, input_row_idx, input_col_idx, current_color);
+            print_board(&board);
+        } else {
+            match current_color {
+                Color::Black => {no_more_moves_black = true;},
+                Color::White => {no_more_moves_white = true;},
+            }
+            println!("{} player has no valid move.", match current_color {
+                Color::Black => "B",
+                Color::White => "W",
+            });
+        }
 
         // change turn
         current_color = match current_color {
